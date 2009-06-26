@@ -1,10 +1,9 @@
 <?php
-
-require_once(dirname(__FILE__).'/utils.php');
+require_once dirname(__FILE__).'/utils.php';
 
 class Response
 {
-	/*static*/ function httpMessageFromStatus($code)
+	/*static*/ function messageFromStatus($code)
 	{
 		switch( $code )
 		{
@@ -65,7 +64,7 @@ class Response
 
 	/*static*/ function status($status)
 	{
-		$msg = Response::httpMessageFromCode($status);
+		$msg = Response::messageFromStatus($status);
 		header('HTTP/1.1 '.$status.' '.$msg);
 	}
 	

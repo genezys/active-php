@@ -1,16 +1,15 @@
 <?php
-
-require_once(dirname(__FILE__).'/utils.php');
+require_once dirname(__FILE__).'/utils.php';
 
 class Request
 {
 	/*static*/ function method()
 	{
-		return Utils::strDefault(
-			strtoupper(Utils::mapGet($_GET, 'x-rest-method')),
+		return strtolower(Utils::strDefault(
+			Utils::mapGet($_GET, 'x-rest-method'),
 			Utils::mapGet($_SERVER, 'REQUEST_METHOD'),
 			'GET'
-		);
+		));
 	}
 
 	/*static*/ function script()
@@ -62,23 +61,8 @@ class Request
 	/*static*/ function query()
 	{
 		$queryString = Utils::substrAfter(Request::uri(), '?');
-		if( strlen($queryString) == 0 )
-		{
-			return array();
-		}
-		$parts = explode('&', trim($queryString, '&'));
 		$query = array();
-		foreach( $parts as $part )
-		{
-			$key = Utils::substrBefore($part, '=');
-			$value = Utils::substrAfter($part, '=');
-			$query[$key] = Utils::mapGet($query, $key, array());
-			if( isset($query[$key]) )
-			{
-
-			}
-			$query[$key][] = $value;
-		}
+		parse_str($queryString, $query);
 		return $query;
 	}
 
@@ -87,7 +71,52 @@ class Request
 		return file_get_contents('php://input');
 	}
 	
+	/*static*/ function user()
+	{
+		return Utils::mapGet($_SERVER, 'PHP_AUTH_USER');
+	}
+
+	/*static*/ function password()
+	{
+		return Utils::mapGet($_SERVER, 'PHP_AUTH_PW');
+	}
+	
+	/*static*/ function types()
+	{
+		return Request::_parseAccept('HTTP_ACCEPT');
+	}
+	
+	/*static*/ function languages()
+	{
+		return Request::_parseAccept('HTTP_ACCEPT_LANGUAGE');
+	}
+	
+	/*static*/ function encodings()
+	{
+		return Request::_parseAccept('HTTP_ACCEPT_ENCODING');
+	}
+	
+	/*static*/ function charsets()
+	{
+		return Request::_parseAccept('HTTP_ACCEPT_CHARSET');
+	}
+	
 	/*private*/
+	
+	/*static*/ function _parseAccept($key)
+	{
+		$acceptString = Utils::mapGet($_SERVER, $key, '');
+		preg_match_all('$([\-/+*A-Za-z0-9]+(?:,[\-/+*a-z0-9]+)*)(?:;q=([0-9.]+))?$', $acceptString, $matches);
+		
+		$accept = array();
+		foreach( $matches[2] as $index => $priority ) 
+		{
+			$values = Utils::strSplit($matches[1][$index], ',');
+			$accept[$priority] = array_merge(Utils::mapGet($accept, $priority, array()), $values);
+		}
+		krsort($accept, SORT_NUMERIC);
+		return $accept;		
+	}
 }
 
 ?>

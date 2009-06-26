@@ -24,6 +24,15 @@ class Utils
 		}
 	}
 	
+	/*static*/ function strSplit($str, $separator)
+	{
+		if( strlen($str) == 0 )
+		{
+			return array();
+		}
+		return explode($separator, $str);
+	}
+	
 	/*static*/ function substrBefore($str, $what)
 	{
 		$index = strpos($str, $what);
