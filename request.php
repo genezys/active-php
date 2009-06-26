@@ -15,7 +15,7 @@ class Request
 
 	/*static*/ function script()
 	{
-		$scriptName = Utils::mapGet($_SERVER, 'SCRIPT_NAME');
+		$scriptName = Utils::mapGet($_SERVER, 'SCRIPT_NAME', '');
 		$script = substr(Request::uri(), 0, strlen($scriptName));
 		
 		if( $script != $scriptName )
@@ -34,7 +34,7 @@ class Request
 
 	/*static*/ function uri()
 	{
-		return Utils::strDefault(Utils::mapGet($_SERVER, 'REQUEST_URI'), '');
+		return Utils::mapGet($_SERVER, 'REQUEST_URI', '');
 	}
 	
 	/*static*/ function relative($uri)
@@ -66,11 +66,18 @@ class Request
 		{
 			return array();
 		}
-		$parts = explode('&', $queryString);
+		$parts = explode('&', trim($queryString, '&'));
 		$query = array();
 		foreach( $parts as $part )
 		{
-			$query[Utils::substrBefore($part, '=')] = Utils::substrAfter($part, '=');
+			$key = Utils::substrBefore($part, '=');
+			$value = Utils::substrAfter($part, '=');
+			$query[$key] = Utils::mapGet($query, $key, array());
+			if( isset($query[$key]) )
+			{
+
+			}
+			$query[$key][] = $value;
 		}
 		return $query;
 	}

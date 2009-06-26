@@ -2,14 +2,14 @@
 
 class Utils
 {
-	/*static*/ function arrayGet($a, $index)
+	/*static*/ function arrayGet($a, $index, $default = null)
 	{
-		return sizeof($a) > $index ? $a[$index] : '';
+		return sizeof($a) > $index ? $a[$index] : $default;
 	}
 
-	/*static*/ function mapGet($map, $key)
+	/*static*/ function mapGet($map, $key, $default = null)
 	{
-		return isset($map[$key]) ? $map[$key] : '';
+		return isset($map[$key]) ? $map[$key] : $default;
 	}
 	
 	/*static*/ function strDefault()
