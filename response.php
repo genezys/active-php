@@ -68,10 +68,10 @@ class Response
 		header('HTTP/1.1 '.$status.' '.$msg);
 	}
 	
-	/*static*/ function contentType($contentType, $encoding = '')
+	/*static*/ function contentType($contentType, $encoding = 'UTF-8')
 	{
-		$encoding = Utils::strDefault($encoding, 'UTF-8');
-		header('Content-Type: '.$contentType.'; charset='.$encoding);
+		$encodingPart = strlen($encoding) > 0 ? ';charset='.$encoding : '';
+		header('Content-Type: '.$contentType.$encodingPart);
 	}
 
 	/*static*/ function location($uri)

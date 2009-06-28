@@ -5,11 +5,11 @@ class Request
 {
 	/*static*/ function method()
 	{
-		return strtolower(Utils::strDefault(
+		return Utils::strDefault(
 			Utils::mapGet($_GET, 'x-rest-method'),
 			Utils::mapGet($_SERVER, 'REQUEST_METHOD'),
 			'GET'
-		));
+		);
 	}
 
 	/*static*/ function script()

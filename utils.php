@@ -42,6 +42,7 @@ class Utils
 		}
 		return $str;
 	}
+	
 	/*static*/ function substrAfter($str, $what)
 	{
 		$index = strpos($str, $what);
@@ -50,6 +51,12 @@ class Utils
 			return substr($str, $index + 1);
 		}
 		return '';
+	}
+	
+	/*static*/ function strEndsWith($str, $with)
+	{
+		$len = strlen($with);
+		return ( substr($str, -$len) == $with );
 	}
 	
 	/*static*/ function escapeMagicQuotes($str)
