@@ -4,6 +4,7 @@ require_once dirname(__FILE__).'/response.php';
 
 class Controller
 {
+	static $encoding;
 	static $views;
 	static $routes = array();
 	static $responseTypes = array(); 
@@ -38,10 +39,10 @@ class Controller
 		}
 
 		Response::status(404);
-		echo 'Not Found';
+		echo Response::messageFromStatus(404);
 	}
 	
-	/*static*/ function authenticateBasic($handler, $realm)
+	/*static*/ function authenticateBasic($realm, $handler)
 	{
 		$user = Request::user();
 		$password = Request::password();
@@ -56,21 +57,25 @@ class Controller
 		}	
 	}
 	
-	/*static*/ function views($path)
+	/*static*/ function encoding($encoding)
 	{
-		Controller::$views = $path;
+		Controller::$encoding = $encoding;
 	}
 	
-	/*static*/ function respondWith($handler, $extension, $mime, $encoding = 'UTF-8')
+	/*static*/ function views($fileRelativeTo, $path)
 	{
-		Controller::_addResponseType($extension, $mime, $encoding, array('handler' => $handler));
+		Controller::$views = dirname($fileRelativeTo).'/'.$path.'/'.basename($fileRelativeTo, '.php').'.';
 	}
 	
-	/*static*/ function respondWithView($fileRelativeTo, $extension, $mime, $encoding = 'UTF-8')
+	/*static*/ function respondWith($extension, $mime, $handler)
 	{
-		$viewFileName = Controller::$views.'/'.basename($fileRelativeTo, '.php').'.'.$extension.'.php';
-		Controller::_addResponseType($extension, $mime, $encoding, 
-			array('view' => dirname($fileRelativeTo).'/'.$viewFileName)
+		Controller::_addResponseType($extension, $mime, array('handler' => $handler));
+	}
+	
+	/*static*/ function respondWithView($extension, $mime)
+	{
+		Controller::_addResponseType($extension, $mime, 
+			array('view' => Controller::$views.$extension.'.php')
 		);
 	}
 	
@@ -79,6 +84,7 @@ class Controller
 		$pathInfo = Request::pathInfo();
 		$lastPathInfoPart = end($pathInfo);
 		$types = Request::types();
+		
 		
 		$registeredTypes = array();
 		foreach( Controller::$responseTypes as $responseType ) 
@@ -102,7 +108,7 @@ class Controller
 		// Use prefered type to respond
 		$preferedType = reset($registeredTypes);
 		// Response
-		Response::contentType($preferedType['mime'], $preferedType['encoding']);
+		Response::contentType($preferedType['mime'], Controller::$encoding);
 		if( isset($preferedType['view']) ) 
 		{
 			include $preferedType['view'];
@@ -115,12 +121,11 @@ class Controller
 	
 	/*private*/
 	
-	/*static*/ function _addResponseType($extension, $mime, $encoding, $response)
+	/*static*/ function _addResponseType($extension, $mime, $response)
 	{
 		Controller::$responseTypes[] = array_merge(array(
-			'extension' => $extension, 
 			'mime' => $mime,
-			'encoding' => $encoding,
+			'extension' => $extension,
 		), $response);
 	}
 	

@@ -50,7 +50,7 @@ class Request
 		$pathInfo = Utils::escapeMagicQuotes($pathInfo);
 		$pathInfo = Utils::substrBefore($pathInfo, '?');
 		$pathInfo = urldecode($pathInfo);
-		$pathInfo = ltrim($pathInfo, '/');
+		$pathInfo = trim($pathInfo, '/');
 		if( strlen($pathInfo) == 0 )
 		{
 			return array();

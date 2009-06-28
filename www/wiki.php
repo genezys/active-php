@@ -16,9 +16,9 @@ Controller::route('get', 'pages', 'getPageList');
 
 function getPageList($params)
 {
-	Controller::views('../views');
-	Controller::respondWithView(__FILE__, 'html', 'text/html');
-	Controller::respondWithView(__FILE__, 'xml', 'application/atom+xml');
+	Controller::views(__FILE__, '../views');
+	Controller::respondWithView('html', 'text/html');
+	Controller::respondWithView('xml', 'application/atom+xml');
 
 	Controller::respond(array(
 		'pages' => array('plop', 'onk'),
@@ -40,11 +40,11 @@ function getPage($params)
 {
 	if( $params[':id'] == 'Plop' ) 
 	{
-		$params[':loggedIn'] = Controller::authenticateBasic('authenticate', 'Wiki!');
+		$params[':loggedIn'] = Controller::authenticateBasic('Wiki!', 'authenticate');
 	}
 
-	Controller::respondWith('getPageAsText', 'text/plain', 'txt');
-	Controller::respondWith('getPageAsHtml', 'text/html', 'html');
+	Controller::respondWith('txt', 'text/plain', 'getPageAsText');
+	Controller::respondWith('html', 'text/html', 'getPageAsHtml');
 	Controller::respond($params);
 }
 function getPageAsText($params)
