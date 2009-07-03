@@ -2,16 +2,17 @@
 require_once dirname(__FILE__).'/request.php';
 require_once dirname(__FILE__).'/response.php';
 
-class Controller
+class ActiveController
 {
 	static $encoding;
 	static $views;
 	static $routes = array();
 	static $responseTypes = array(); 
+	static $format;
 	
 	/*static*/ function route($method, $path, $handler)
 	{
-		Controller::$routes[] = array(
+		ActiveController::$routes[] = array(
 			'method' => $method,
 			'path' => $path,
 			'handler' => $handler,
@@ -20,87 +21,98 @@ class Controller
 	
 	/*static*/ function dispatch()
 	{
-		$currentMethod = Request::method();
-		$currentPathInfo = Request::pathInfo();
+		$currentMethod = ActiveRequest::method();
+		$currentPathInfo = ActiveRequest::pathInfo();
 		
-		foreach( Controller::$routes as $route )
+		foreach( ActiveController::$routes as $route )
 		{
-			$pathInfo = Utils::strSplit(trim($route['path'], '/'), '/');
+			$pathInfo = trim($route['path'], '/');
 			
 			if( strcasecmp($route['method'], $currentMethod) == 0 )
 			{
-				$params = Controller::_tryExtractParams($pathInfo, $currentPathInfo);
+				$params = ActiveController::_tryExtractParams($pathInfo, $currentPathInfo);
 				if( $params !== false ) 
 				{
+					ActiveController::$format = $params['format'];
 					call_user_func($route['handler'], $params);
 					return;
 				}
 			}
 		}
 
-		Response::status(404);
-		echo Response::messageFromStatus(404);
+		ActiveResponse::status(404);
+		echo ActiveResponse::messageFromStatus(404);
 	}
 	
 	/*static*/ function authenticateBasic($realm, $handler)
 	{
-		$user = Request::user();
-		$password = Request::password();
+		$user = ActiveRequest::user();
+		$password = ActiveRequest::password();
 		if( call_user_func($handler, $user, $password) === true )
 		{
 			return true;
 		}
 		else
 		{
-			Response::authenticate('Basic', $realm);
+			ActiveResponse::authenticate('Basic', $realm);
 			exit();
 		}	
 	}
 	
 	/*static*/ function encoding($encoding)
 	{
-		Controller::$encoding = $encoding;
+		ActiveController::$encoding = $encoding;
 	}
 	
 	/*static*/ function views($fileRelativeTo, $path)
 	{
-		Controller::$views = dirname($fileRelativeTo).'/'.$path.'/'.basename($fileRelativeTo, '.php').'.';
+		ActiveController::$views = dirname($fileRelativeTo).'/'.$path.'/'.basename($fileRelativeTo, '.php').'.';
 	}
 	
 	/*static*/ function respondWith($extension, $mime, $handler)
 	{
-		Controller::_addResponseType($extension, $mime, array('handler' => $handler));
+		ActiveController::_addResponseType($extension, $mime, array('handler' => $handler));
 	}
 	
 	/*static*/ function respondWithView($extension, $mime)
 	{
-		Controller::_addResponseType($extension, $mime, 
-			array('view' => Controller::$views.$extension.'.php')
+		ActiveController::_addResponseType($extension, $mime, 
+			array('view' => ActiveController::$views.$extension.'.php')
 		);
 	}
 	
 	/*static*/ function respond($values)
 	{
-		$pathInfo = Request::pathInfo();
-		$lastPathInfoPart = end($pathInfo);
-		$types = Request::types();
-		
+		$pathInfo = ActiveRequest::pathInfo();
+		$types = ActiveRequest::types();
 		
 		$registeredTypes = array();
-		foreach( Controller::$responseTypes as $responseType ) 
+		foreach( ActiveController::$responseTypes as $responseType ) 
 		{
-			// Extension overrides any other option
-			if( Utils::strEndsWith($lastPathInfoPart, '.'.$responseType['extension']) ) 
+			if( strlen(ActiveController::$format) > 0 )
 			{
-				$registeredTypes = array($responseType);
-				break;
+				// Extension overrides any other option
+				if( ActiveController::$format == $responseType['extension'] ) 
+				{
+					$registeredTypes = array($responseType);
+					break;
+				}
 			}
-			// If type is handled by the browser, we will keep it
-			$priority = Controller::_typeHandled($types, $responseType['mime']);
-			if( $priority !== false ) 
+			else 
 			{
-				$registeredTypes[$priority] = $responseType;
+				// If type is handled by the browser, we will keep it
+				$priority = ActiveController::_typeHandled($types, $responseType['mime']);
+				if( $priority !== false ) 
+				{
+					$registeredTypes[$priority] = $responseType;
+				}
 			}
+		}
+		if( count($registeredTypes) == 0 ) 
+		{
+			ActiveResponse::status(501);
+			echo ActiveResponse::messageFromStatus(501);
+			return;
 		}
 		
 		// Sort based on browser preferences
@@ -108,7 +120,7 @@ class Controller
 		// Use prefered type to respond
 		$preferedType = reset($registeredTypes);
 		// Response
-		Response::contentType($preferedType['mime'], Controller::$encoding);
+		ActiveResponse::contentType($preferedType['mime'], ActiveController::$encoding);
 		if( isset($preferedType['view']) ) 
 		{
 			include $preferedType['view'];
@@ -123,7 +135,7 @@ class Controller
 	
 	/*static*/ function _addResponseType($extension, $mime, $response)
 	{
-		Controller::$responseTypes[] = array_merge(array(
+		ActiveController::$responseTypes[] = array_merge(array(
 			'mime' => $mime,
 			'extension' => $extension,
 		), $response);
@@ -146,36 +158,23 @@ class Controller
 	
 	/*static*/ function _tryExtractParams($pathInfo, $currentPathInfo)
 	{
-		if( count($pathInfo) != count($currentPathInfo) ) 
+		$pathInfo = preg_replace('$([.\+*?()[/\\]])$', '\\\\\\1', $pathInfo);
+		$pathInfo = preg_replace('$:([a-z]+)$', '(?P<\\1>.+?)', $pathInfo);
+		$pathInfo = '/^'.$pathInfo.'$/';
+		
+		if( preg_match($pathInfo, $currentPathInfo, $matches) )
 		{
-			return false;
-		}
-		$diff = array_diff_assoc($pathInfo, $currentPathInfo);
-		// Test if all difference are actual params
-		$params = array();
-		foreach( $diff as $index => $param )
-		{
-			$value = Utils::substrBefore($currentPathInfo[$index], '.');
-			if( $param == $value )
+			$params = array();
+			foreach( $matches as $key => $value ) 
 			{
-				continue;
+				if( !is_numeric($key) )
+				{
+					$params[$key] = $value;
+				}
 			}
-			if( substr($param, 0, 1) != ':' )
-			{
-				return false;
-			}
-			$params[$param] = $value;
+			return $params;
 		}
-		return $params;
-	}
-	
-	/*static*/ function _compareParams($param, $currentParam)
-	{
-		if( substr($param, 0, 1) == ':' )
-		{
-			return 0;
-		}
-		return strcmp($param, $currentParam);
+		return false;
 	}
 }
 

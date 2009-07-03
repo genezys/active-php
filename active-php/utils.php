@@ -1,6 +1,6 @@
 <?php
 
-class Utils
+class ActiveUtils
 {
 	/*static*/ function arrayGet($a, $index, $default = null)
 	{

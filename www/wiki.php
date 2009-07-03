@@ -12,21 +12,23 @@ function authenticate($user, $password)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-Controller::route('get', 'pages', 'getPageList');
+ActiveController::route('get', 'pages.:format', 'getPageList');
+ActiveController::route('get', 'pages', 'getPageList');
 
 function getPageList($params)
 {
-	Controller::views(__FILE__, '../views');
-	Controller::respondWithView('html', 'text/html');
-	Controller::respondWithView('xml', 'application/atom+xml');
+	ActiveController::views(__FILE__, '../views');
+	ActiveController::respondWithView('html', 'text/html');
+	ActiveController::respondWithView('xml', 'application/atom+xml');
 
-	Controller::respond(array(
+	ActiveController::respond(array(
 		'pages' => array('plop', 'onk'),
 	));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-Controller::route('post', 'pages', 'createPage');
+ActiveController::route('post', 'pages.:format', 'getPageList');
+ActiveController::route('post', 'pages', 'createPage');
 
 function createPage($params)
 {
@@ -34,32 +36,34 @@ function createPage($params)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-Controller::route('get', 'pages/:id', 'getPage');
+ActiveController::route('get', 'pages/:id.:format', 'getPage');
+ActiveController::route('get', 'pages/:id', 'getPage');
 
 function getPage($params)
 {
-	if( $params[':id'] == 'Plop' ) 
+	if( $params['id'] == 'Plop' ) 
 	{
-		$params[':loggedIn'] = Controller::authenticateBasic('Wiki!', 'authenticate');
+		$params['loggedIn'] = ActiveController::authenticateBasic('Wiki!', 'authenticate');
 	}
 
-	Controller::respondWith('txt', 'text/plain', 'getPageAsText');
-	Controller::respondWith('html', 'text/html', 'getPageAsHtml');
-	Controller::respond($params);
+	ActiveController::respondWith('txt', 'text/plain', 'getPageAsText');
+	ActiveController::respondWith('html', 'text/html', 'getPageAsHtml');
+	ActiveController::respond($params);
 }
 function getPageAsText($params)
 {
-	var_dump(Request::query());
+	var_dump(ActiveRequest::query());
 
-	echo 'Page '.$params[':id'];
+	echo 'Page '.$params['id'];
 }
 function getPageAsHtml($params)
 {
-	echo 'Page ' . $params[':id'];
+	echo 'Page ' . $params['id'];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-Controller::route('put', 'pages/:id', 'updatePage');
+ActiveController::route('put', 'pages/:id.:format', 'updatePage');
+ActiveController::route('put', 'pages/:id', 'updatePage');
 
 function updatePage($params)
 {
@@ -67,7 +71,8 @@ function updatePage($params)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-Controller::route('delete', 'pages/:id', 'deletePage');
+ActiveController::route('delete', 'pages/:id.:format', 'deletePage');
+ActiveController::route('delete', 'pages/:id', 'deletePage');
 
 function deletePage($params)
 {
@@ -75,5 +80,5 @@ function deletePage($params)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-Controller::dispatch();
+ActiveController::dispatch();
 ?>

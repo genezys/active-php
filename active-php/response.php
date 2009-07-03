@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__FILE__).'/utils.php';
 
-class Response
+class ActiveResponse
 {
 	/*static*/ function messageFromStatus($code)
 	{
@@ -64,7 +64,7 @@ class Response
 
 	/*static*/ function status($status)
 	{
-		$msg = Response::messageFromStatus($status);
+		$msg = ActiveResponse::messageFromStatus($status);
 		header('HTTP/1.1 '.$status.' '.$msg);
 	}
 	
