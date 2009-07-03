@@ -159,6 +159,7 @@ class ActiveController
 	/*static*/ function _tryExtractParams($pathInfo, $currentPathInfo)
 	{
 		$pathInfo = preg_replace('$([.\+*?()[/\\]])$', '\\\\\\1', $pathInfo);
+		$pathInfo = preg_replace('$\\\\\\((.+?)\\\\\\)$', '(\\1)?', $pathInfo);
 		$pathInfo = preg_replace('$:([a-z]+)$', '(?P<\\1>.+?)', $pathInfo);
 		$pathInfo = '/^'.$pathInfo.'$/';
 		

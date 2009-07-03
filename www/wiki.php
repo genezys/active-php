@@ -12,8 +12,7 @@ function authenticate($user, $password)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-ActiveController::route('get', 'pages.:format', 'getPageList');
-ActiveController::route('get', 'pages', 'getPageList');
+ActiveController::route('get', 'pages(.:format)', 'getPageList');
 
 function getPageList($params)
 {
@@ -27,8 +26,7 @@ function getPageList($params)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-ActiveController::route('post', 'pages.:format', 'getPageList');
-ActiveController::route('post', 'pages', 'createPage');
+ActiveController::route('post', 'pages(.:format)', 'getPageList');
 
 function createPage($params)
 {
@@ -36,9 +34,7 @@ function createPage($params)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-ActiveController::route('get', 'pages/:id.:format', 'getPage');
-ActiveController::route('get', 'pages/:id', 'getPage');
-
+ActiveController::route('get', 'pages/:id(.:format)', 'getPage');
 function getPage($params)
 {
 	if( $params['id'] == 'Plop' ) 
@@ -62,8 +58,7 @@ function getPageAsHtml($params)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-ActiveController::route('put', 'pages/:id.:format', 'updatePage');
-ActiveController::route('put', 'pages/:id', 'updatePage');
+ActiveController::route('put', 'pages/:id(.:format)', 'updatePage');
 
 function updatePage($params)
 {
@@ -71,8 +66,7 @@ function updatePage($params)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-ActiveController::route('delete', 'pages/:id.:format', 'deletePage');
-ActiveController::route('delete', 'pages/:id', 'deletePage');
+ActiveController::route('delete', 'pages/:id(.:format)', 'deletePage');
 
 function deletePage($params)
 {
