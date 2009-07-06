@@ -2,9 +2,9 @@
 
 class ActiveUtils
 {
-	/*static*/ function arrayGet($map, $key, $default = null)
+	/*static*/ function arrayGet($array, $key, $default = null)
 	{
-		return isset($map[$key]) ? $map[$key] : $default;
+		return isset($array[$key]) ? $array[$key] : $default;
 	}
 }
 

@@ -5,11 +5,15 @@ class ActiveDiff
 {
 	/*static*/ function compare($array1, $array2)
 	{
-		$diff = array();
-		return ActiveDiff::_compare($array1, 0, $array2, $diff);
+//		echo "=============================================\n";
+//		print_r($array1);
+//		print_r($array2);
+//		print_r(array_diff_assoc($array1, $array2));
+//		print_r(array_diff_assoc($array2, $array1));
+		return ActiveDiff::_compare(array_merge($array1), 0, array_merge($array2), array());
 	}
 
-	/*static*/ function patch(&$array, &$patch)
+	/*static*/ function patch($array, $patch)
 	{
 		$array = array_merge($array);
 		foreach( $patch as $location => $items )
@@ -18,11 +22,17 @@ class ActiveDiff
 			$action = substr($location, -1);
 			if( $action === '+' )
 			{
-				array_splice($array, $index, 0, $items);
+				$remaining = array_splice($array, $index);
+				foreach( $items as $item ) { array_push($array, $item); }
+				foreach( $remaining as $item ) { array_push($array, $item); }
 			}
 			elseif( $action === '-' )
 			{
-				array_splice($array, $index, count($items));
+				foreach( $items as $item )
+				{
+					unset($array[$index]);
+					$index += 1;
+				}
 			}
 		}
 		return $array;
@@ -30,7 +40,7 @@ class ActiveDiff
 
 	/*private*/
 
-	/*static*/ function _compare(&$array1, $index, &$array2, &$diff)
+	/*static*/ function _compare($array1, $index, $array2, $diff)
 	{
 		// var_dump($array1, $array2);
 

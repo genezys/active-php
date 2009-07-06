@@ -87,6 +87,11 @@ function getPageAsText($params)
 		$orig = array(1,2,3);
 		$result = array(1,3,2);
 		assertEquals(ActiveDiff::patch($orig, ActiveDiff::compare($orig, $result)), $result);
+		
+		$file1 = file('file1.txt', FILE_IGNORE_NEW_LINES);
+		$file2 = file('file2.txt', FILE_IGNORE_NEW_LINES);
+		var_dump(ActiveDiff::compare($file1, $file2));
+		
 	}
 }
 function getPageAsHtml($params)
