@@ -46,11 +46,21 @@ function getPage($params)
 	ActiveController::respondWith('html', 'text/html', 'getPageAsHtml');
 	ActiveController::respond($params);
 }
-function assertEquals($value1, $value2)
+function assertEquals($code1, $value2)
 {
-	if( $value1 !== $value2 ) 
+	$value1 = $code1;
+	if( gettype($code1) == 'string' )
 	{
-		var_dump("Got", $value1, "instead of", $value2);
+		$value1 = eval('return '.$code1.';');
+	}
+
+	if( $value1 !== $value2 )
+	{
+		echo $code1, "\n";
+		echo "Got\n";
+		print_r($value1);
+		echo "instead of\n";
+		print_r($value2);
 	}
 }
 
@@ -62,18 +72,21 @@ function getPageAsText($params)
 	
 	if( $params['id'] == 'diff' ) 
 	{
-		assertEquals(ActiveDiff::compare(array(), array()), array());
-		assertEquals(ActiveDiff::compare(array(1,2,3), array(1,2,3)), array());
-		assertEquals(ActiveDiff::compare(array(), array(1,2,3)), array(array('+' => array(1,2,3))));
-		assertEquals(ActiveDiff::compare(array(1,2,3), array()), array(array('-' => array(1,2,3))));
-		assertEquals(ActiveDiff::compare(array(1,2,3), array(1,2)), array(array('-' => array(3))));
-		assertEquals(ActiveDiff::compare(array(1,2), array(1,2,3)), array(array('+' => array(3))));
-		assertEquals(ActiveDiff::compare(array(1,2,3), array(2,3)), array(array('-' => array(1))));
-		assertEquals(ActiveDiff::compare(array(2,3), array(1,2,3)), array(array('+' => array(1))));
-		assertEquals(ActiveDiff::compare(array(1,2,3), array(1,3)), array(array('-' => array(2))));
-		assertEquals(ActiveDiff::compare(array(1,3), array(1,2,3)), array(array('+' => array(2))));
-		assertEquals(ActiveDiff::compare(array(1,2,3), array(1,3,2)),  
-			array(array('+' => array(3)), array('-' => array(3))));
+		assertEquals("ActiveDiff::compare(array(), array())", array());
+		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,2,3))", array());
+		assertEquals("ActiveDiff::compare(array(), array(1,2,3))", array('0+' => array(1,2,3)));
+		assertEquals("ActiveDiff::compare(array(1,2,3), array())", array('0-' => array(1,2,3)));
+		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,2))", array('2-' => array(3)));
+		assertEquals("ActiveDiff::compare(array(1,2), array(1,2,3))", array('2+' => array(3)));
+		assertEquals("ActiveDiff::compare(array(1,2,3), array(2,3))", array('0-' => array(1)));
+		assertEquals("ActiveDiff::compare(array(2,3), array(1,2,3))", array('0+' => array(1)));
+		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,3))", array('1-' => array(2)));
+		assertEquals("ActiveDiff::compare(array(1,3), array(1,2,3))", array('1+' => array(2)));
+		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,3,2))", array('1+' => array(3), '3-' => array(3)));
+
+		$orig = array(1,2,3);
+		$result = array(1,3,2);
+		assertEquals(ActiveDiff::patch($orig, ActiveDiff::compare($orig, $result)), $result);
 	}
 }
 function getPageAsHtml($params)

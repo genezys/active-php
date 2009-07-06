@@ -33,7 +33,7 @@ class ActiveController
 				$params = ActiveController::_tryExtractParams($pathInfo, $currentPathInfo);
 				if( $params !== false ) 
 				{
-					ActiveController::$format = $params['format'];
+					ActiveController::$format = ActiveUtils::arrayGet($params, 'format');
 					call_user_func($route['handler'], $params);
 					return;
 				}
