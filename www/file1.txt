@@ -1,494 +1,108 @@
-dadaedad
+<?php
+require_once dirname(__FILE__).'/utils.php';
+
+class ActiveDiff
+{
+	/*static*/ function compare($array1, $array2)
+	{
+//		echo "=============================================\n";
+//		print_r($array1);
+//		print_r($array2);
+//		print_r(array_diff_assoc($array1, $array2));
+//		print_r(array_diff_assoc($array2, $array1));
+		return ActiveDiff::_compare(array_merge($array1), 0, array_merge($array2), array());
+	}
+
+	/*static*/ function patch($array, $patch)
+	{
+		$array = array_merge($array);
+		foreach( $patch as $location => $items )
+		{
+			$index = intval(substr($location, 0, -1));
+			$action = substr($location, -1);
+			if( $action === '+' )
+			{
+				$remaining = array_splice($array, $index);
+				foreach( $items as $item ) { array_push($array, $item); }
+				foreach( $remaining as $item ) { array_push($array, $item); }
+			}
+			elseif( $action === '-' )
+			{
+				foreach( $items as $item )
+				{
+					unset($array[$index]);
+					$index += 1;
+				}
+			}
+		}
+		return $array;
+	}
+
+	/*private*/
+
+	/*static*/ function _compare($array1, $index, $array2, $diff)
+	{
+		// var_dump($array1, $array2);
+
+		if( count($array1) == 0 && count($array2) == 0 )
+		{
+			return $diff;
+		}
+		if( count($array1) == 0 && count($array2) > 0 )
+		{
+			$diff[$index.'+'] = $array2;
+			return $diff;
+		}
+		if( count($array2) == 0 && count($array1) > 0 )
+		{
+			$diff[$index.'-'] = $array1;
+			return $diff;
+		}
+
+		$item1 = reset($array1);
+		$item2 = reset($array2);
+
+		if( $item1 === $item2 )
+		{
+			// Same !
+			array_shift($array1);
+			array_shift($array2);
+			$index += 1;
+		}
+		else
+		{
+			// Search item1 and item2 in the remaining
+			$index1 = array_search($item2, $array1);
+			$index2 = array_search($item1, $array2);
+
+			if( $index1 === false && $index2 === false )
+			{
+				$diff[$index.'-'] = array($item1);
+				$diff[$index.'+'] = array($item2);
+			}
+			else
+			{
+				$max = max(count($array1), count($array2));
+				if( $index1 === false ) { $index1 = $max; }
+				if( $index2 === false ) { $index2 = $max; }
+
+				if( $index1 >= $index2 )
+				{
+					// item1 has been found in array2 (before item2 in array1)
+					// array2 items has been added
+					$diff[$index.'+'] = array_splice($array2, 0, $index2);
+					$index += $index2;
+				}
+				else
+				{
+					$diff[$index.'-'] = array_splice($array1, 0, $index1);
+					$index += $index1;
+				}
+			}
+		}
+		return ActiveDiff::_compare($array1, $index, $array2, $diff);
+	}
+}
 
-!Essai de Chuwiki
-_test d'un texte italique dans le wiki._
 
-@@test du préformatage de texte@@
-
-[liens|http://php.net]
-====
-
-
-! Salut
-!!yeah!
-Je fais mon test ici
-
-Ca a l'air de bien fonctionner ... super! ;-)
-
-!! Google Analytics
-Peut on ajouter le code Google Analytics dans un template par exemple ?
-Merci
-
-babgond
-
----
-
-Premier essai premiers pâtés de treb
-[Anime-france.info : manga anime actualités|http://www.anime-france.info]
-
-toto 
----- titi
-!!tyty
-
-sdfsfqqss
-
-on essaye
-
-http://cybercoffeeshop.info/
-cyber coffee shop ! It's time.
-!Plop
-!!Plup
-!!!Glop
-!!!!NArf
-!!!!!Aglarfchoubidouwap
-dgdff
-
-[Oulalal les gros liens qu'on peut faire, ya-t-il une limite techinque ou on peut remplire toute la page avec ce texte? et si on veut mettre un cochet on fait comment ?|http://portailglu.webzzanine.net]
-
->Ca marche !
-
-----
-!!!Bonjour! Vous allez peut-être pouvoir m'aider?
-
->Je sais comment fait un lien, par exemple:
-
-[APC8...|http://www.apc8.org||Association des Pilotes de Classe 8 (char à cerf-volant)]
-
->Je sais aussi comment mettre une image:
-
-((http://apc8.free.fr/images/logo_small.jpg|Par contre, le texte alternatif ne semble pas fonctionner...|C))
-
-
-
-_texte_
-    Faire une emphase
-__texte__
-    Faire une emphase forte
-@@texte@@
-    Faire un petit code
-''texte|langue|source''
-    Faire une petite citation
->texte
-    Faire un paragraphe de citation
-[texte|URI|langue|titre]
-    Faire un lien vers une page, les paramètres sont optionnels
-((image|texte alternatif|alignement))
-    Ajouter une image, alignement peut valoir G(auche), D(roite) ou C(entre)
-texte
-    Tout texte écrit simplement sera transformé en paragraphes.
-!titre1, !!titre2, !!!titre3, etc
-    Créer un titre d'un niveau égal au nombre de !
--texte ou *texte
-    Faire une liste d'éléments non numérotés
-#texte
-    Faire une liste d'éléments numérotés
-;titre:définition
-    Faire une définition/liste de définitions
-??acronyme|titre??
-    Faire un acronyme
-[ESPACE]texte
-    Le texte sera préformaté, utile pour écrire des bouts de code
-==== ou ---- (au moins 4)
-    Une ligne de séparation horizontale
-\
-    Si vous ne voulez pas que la syntaxe wiki s'applique, fa
-
->Mais comment fait on pour avoir une image qui soit un lien, par exemple qui combine les deux exemples ci-dessus?
-
->D'autre part, j'ai l'impression que l'option d'un texte alternatif pour une image comme celle ci-dessus ne fonctionne pas, ou bien alors, j'ai mal compris la syntaxe?
-----
-Et bien il suffit de combiner les 2 syntaxes et de remplacer le texte du lien par l'image ;)
-
-[((http://apc8.free.fr/images/logo_small.jpg|Par contre, le texte alternatif ne semble pas fonctionner...|C))|http://www.apc8.org||Association des Pilotes de Classe 8 (char à cerf-volant)]
-
-
-Magnifique :-) Merci!
-
-Autre chose: est-il possible de centrer un texte, de la même manière qu'on peut centrer une image comme celle ci-dessus?
-----
-__Quelqu'un saurait comment supprimer le carré de l'url autour de l'image please ???__
-----
-Ce cadre est là pour indiquer qu'il existe un lien sur l'image. Pour le supprimer, il faut modifier le thème et notamment la feuille de style CSS.
-
->Ou alors utiliser Safari sur Mac, nananère... ;-)
-----
-
-!Titre de niveau 1
-
-!! Titre de niveau 2
-
-!!! Titre de niveau 3
-
-!!!! Titre De NIVEAU 4
-
-test aussi tres rapide nf .....
-GABOUE
-
-_truc_
-
-Test rapide pour découvrir un WIKI...!
-
-Un petit lien : [Exemple|www.google.com]
-
-Un petit lien : [Exemple]
-
-Bon, je découvre les Wiki, et celui-ci est vraiment sympa est simple... seul défaut apparemment, c'est qu'on ne peut pas définir un administrateur. Donc tout le monde peut venir modifier les pages sans aucun contrôle... Sympa quand même !
-
-peut on ajouter un lien ? [Zeelay|http://zeelay.free.fr] Il s'agit de mon site Web qui cause de plein de trucs sympas (star Wars, Logiciels libres et freewares, Stylos 4 couleurs, Origamis, bricolages...)...
-
-
-allez, je suprime des trucs écrits par d'autres avants. tiens , je me demande ce qui se passe si on est plusieurs à éditer en même temps la pages... Ah ben surement que c'est le dernier qui la valide qui gagne ;)
-
-Bon alors je sauve...@
-
-1er 1re 1ers 1res
-
-
-Moi moi!
-Et moi?
-
-Bon là c'est dk qui est passé par là pour les ordinaux. Sinon y'a un autre blème sur [cette page|ord].
-
-Je me lâche, sans avoir été plus loin dans la doc que la page d'accueil à peine survolée.
-
-Autrement-dit, je n'ai aucune idée de la syntaxe Wiki propre à ce lieu. 
-
-> Moi non plus d'ailleurs
-
-
-_ben alors_ __marche comment__
-
-@@chuis passé par là, tra la la@@
-
-??Ouinnnn, pourquoi on peut pas mettre des couleurs ??
-
-
-____TOTO aime TITINE____
-
-dur de changer les abitudes de...
-
-Alors, j'essaye :
-
-[un lien|http://www.blog-and-blues.com]
-8798798798765454
-
- un bloc pre
- avec des lignes
- et des lignes
- et <du code>
- [encore du code]
- blablaaazdazd
-
-Et vite fait
--une liste
--c'est comme ça que je les aime
-
-Mais on peut aussi
-*les faire comme ça
-* avec des *
-*df
-**df
-**df
-***dffdf
-***ddfdf
-**dfd
-*df
->auriaer
->lkqjklf
->klqjdfmklq
-
-Je sauvegarde sans __prévisualiser__
-
-[un lien avec tous les attributs|Accueil|fr|L'accueil]
-
-((../smileys/dkmsn_Teeth.png|plop|C))
-
->[http://www.sfdt.com/flash/movie-pages/movies/12924.html]
->
-> -- Vincent
-
--plop
---++plop++
--- --plopplop--
-====
-====
-====
-[Google|http://www.google.fr|Fr|Moteur de recherche]
-
-_Pas mal le wiki !_
-
-Test avec le [nouveau fil RSS|/latest-change]
-
-Ploum ploum ploum :)
-
-Ajout d'un peu de texte
-
-Plop
-
-Un petit texte ajouté juste pour tester le fil RSS
-
-:D
-
--[De la doc sur NS|http://www-rst.int-evry.fr/~gauthier/index-fr.html]
-
-
-[Accueil] c'est comme ca qu'on fait pour acceder a une page existante?
-[Test de newbie] et c'est comme ca qu'on fait pour en faire une nouvelle?
-
-C'est ça :):D
-
-Alors c'est aussi simple que ça ?
-Pas mal !
-
-__Quelle emphase !_
-
-
-!Titre un
-
-_Je teste aussi_
-
-!!Titre deux
-__Je teste aussi__
-
-"<B> TEST !!!</b>"
-fini. __fini__====
-allez _hop_ au lit
-
- test 
-
-
-<script language="JavaScript1.1" type="text/javascript" src="http://www.matbe.com/export/exportnews.htm"></script>
-
-
-Bon je m'y mets, c'est la première fois. Mais j'ai peur de tout foirer. En plus si je fais une faute, je ne sais pas la corriger.
-
-_test pour WikiTwiki_+
-
-# ligne 1
-## ligne 11
-## ligne 12
-# ligne 2
-
-[http://www.denistouret.net/conshistoire/index.html]
-
-[essai|un/deux]
-
-à Toulouse il fait  :  ((http://perso0.free.fr/cgi-bin/meteo.pl?dep=31|à Toulouse il fait  :  ))  par contre, je n'ai pas compris comment changer les couleurs de fond et autres....   :-(
-
-Bon moi je veux voir comment qu'on fait un lien [http://www.google.fr] on va voir si ça marche............; Bingo !! Par contre ça l'ouvre dans la même fenêtre. et maintenant, _l'italique_
-
-Bien sûr que ça ouvre dans la même fenêtre, et heureusement encore ;) [http://www.publishtogether.com/pompeurs/TargetBlank]
-
-[Un Lien]
-
-[test nouvelle page]
-
-====
-Moi aussi je veux jouer...
-====
-
-Tout le monde peut jouer dans le bac à sable :-)
-
-Have fun :D
-
-----
-
-J'ai un problème de syntaxe... si je veux commencer une ligne par un ">", et bien je ne peux pas!
->>-RdFr->
-
-avec un "\" ça donne ca
-
-\>>-RdFr->
-
-Alors que logiquement, ca devrait faire disparaitre l'antislash et ne laisser que ">>-RdFr->". Quelqu'un a une solution?
-
-[Niko|http://wiki.takafer.com]
-
-> Joli, ceci est un bug. Je vais voir à la corriger pour la prochaine version :-)
-
-----
-
-Vraiment pas mal!! Je reconnais un ptit coup de patte de Darken derrière huhuhu.. 
-
-Perso le wiki ça me fait un peu peur, mais bonne continuation, j'espère que ça va le faire, en tout cas ça commence à être connu 2 posts du site sur [blogmarks.net|http://www.bloagmarks.net/]!! 
-
-See ya ;)
-
-et beh je voi que l on s'amuse sur ce site 
-
-@@Hehe!!!@@
-
-[test2222234]
-
- for ($i=1; $i<=100; $i++)
- {
- 	echo "<option";
- 	if ($forme==$i) { echo " selected=\"selected\""; }
- 	echo ">"; if($i<10) { echo "00"; } elseif($i<100) { echo "0"; } echo "$i %</option>\n";
- }
-
-Salut !
-
-====
-Alors tout rouLe ici !?%%%
-*c la fête ?
-** oui
-**nan
-*la foire !?
-**pire
-**encore
-***nan mais faut arreter
-****et nan
-****ouais ouais c ça !
-**tjs
-**domage
-
-====
-
-EssAi
-
-====
-
---supression--
-
-++insertion++
-
-====
-
-Je n'arrive pas à aller à la ligne sans sauter de ligne... y a-t-il une solution ?
-
-test %%%
-test
-
-Ok j'ai trouvé: avec 3% de suite
-
-Ce __wiki__ est trés sympa, testé sur free.fr, ça semble marcher et c'est plus simple que le wiki proposé.
-
-Merci de permettre a tous de tester le Wiki : __Super pour le travail en communaute !__
-
-----
->Pas sur pour les citations??????
-
-''Et les bloc pre
-comprend pas
-euuuuuuuuuu
-neuwbie dans les blogs?''
- Ha je vois!!!!
-Pas comme ça 
- mais comme ça!
-__J'aime!!!!!__
-
-''texte|langue|source''
-deuxieme essai
-!très bien
-
-Je découvre à peine...et j'adore
-
-
-et sinon c'est bien ce truc ?
-je decouvre aussi
-
-bonjour 
-__une emphase ?__
-
----
-!Un titre
-# un
-#deux
-# trois
- code 
-mais il a l'air sympathique comme tout ce wiki et sans mysql drolemnent bien
-
-je teste quelque chose
-voyons voir si ça fonctionne ici
-
-_alors c'est ça le __bac à sable___ ?
-
-Règles de formatage
-
-
-	
-_TESTWIKI_
-
-	
-    Faire une emphase (italique)
-	
-__texte__
-
-	
-    Faire une emphase forte (gras)
-	
-@@texte@@
-
-	
-    Faire un petit code
-	
-''texte|langue|source''
-
-	
-    Faire une petite citation
-	
->texte
-
-	
-    Faire un paragraphe de citation
-	
-[texte|URI|langue|titre]
-
-	
-    Faire un lien vers une page, les paramètres sont optionnels
-	
-((image|texte alternatif|alignement))
-
-	
-    Ajouter une image, alignement peut valoir G(auche), D(roite) ou C(entre)
-	
-texte
-
-	
-    Tout texte écrit simplement sera transformé en paragraphes.
-	
-!titre1, !!titre2, !!!titre3, etc.
-
-	
-    Créer un titre d'un niveau égal au nombre de !
-	
--texte ou *texte
-
-	
-    Faire une liste d'éléments non numérotés
-	
-#texte
-
-	
-    Faire une liste d'éléments numérotés
-	
-;titre:définition
-
-	
-    Faire une définition/liste de définitions
-	
-??acronyme|titre??
-
-	
-    Faire un acronyme
-	
-[ESPACE]texte ou {{{texte}}}
-
-	
-    Le texte sera préformaté, utile pour écrire des bouts de code
-	
-==== ou ---- (au moins 4)
-
-	
-    Une ligne de séparation horizontale
-	
-\
-
-	
-    Si vous ne voulez pas que la syntaxe wiki s'applique, faites précéder les caractères spéciaux par des anti-slashs.
-
-Est ce que chou wiki est compliqué ?
---test--
->test
-__test__
+?>

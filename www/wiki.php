@@ -72,25 +72,25 @@ function getPageAsText($params)
 	
 	if( $params['id'] == 'diff' ) 
 	{
-		assertEquals("ActiveDiff::compare(array(), array())", array());
-		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,2,3))", array());
-		assertEquals("ActiveDiff::compare(array(), array(1,2,3))", array('0+' => array(1,2,3)));
-		assertEquals("ActiveDiff::compare(array(1,2,3), array())", array('0-' => array(1,2,3)));
-		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,2))", array('2-' => array(3)));
-		assertEquals("ActiveDiff::compare(array(1,2), array(1,2,3))", array('2+' => array(3)));
-		assertEquals("ActiveDiff::compare(array(1,2,3), array(2,3))", array('0-' => array(1)));
-		assertEquals("ActiveDiff::compare(array(2,3), array(1,2,3))", array('0+' => array(1)));
-		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,3))", array('1-' => array(2)));
-		assertEquals("ActiveDiff::compare(array(1,3), array(1,2,3))", array('1+' => array(2)));
-		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,3,2))", array('1+' => array(3), '3-' => array(3)));
+//		assertEquals("ActiveDiff::compare(array(), array())", array());
+//		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,2,3))", array());
+//		assertEquals("ActiveDiff::compare(array(), array(1,2,3))", array('0+' => array(1,2,3)));
+//		assertEquals("ActiveDiff::compare(array(1,2,3), array())", array('0-' => array(1,2,3)));
+//		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,2))", array('2-' => array(3)));
+//		assertEquals("ActiveDiff::compare(array(1,2), array(1,2,3))", array('2+' => array(3)));
+//		assertEquals("ActiveDiff::compare(array(1,2,3), array(2,3))", array('0-' => array(1)));
+//		assertEquals("ActiveDiff::compare(array(2,3), array(1,2,3))", array('0+' => array(1)));
+//		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,3))", array('1-' => array(2)));
+//		assertEquals("ActiveDiff::compare(array(1,3), array(1,2,3))", array('1+' => array(2)));
+//		assertEquals("ActiveDiff::compare(array(1,2,3), array(1,3,2))", array('1+' => array(3), '3-' => array(3)));
 
-		$orig = array(1,2,3);
-		$result = array(1,3,2);
-		assertEquals(ActiveDiff::patch($orig, ActiveDiff::compare($orig, $result)), $result);
+//		$orig = array(1,2,3);
+//		$result = array(1,3,2);
+//		assertEquals(ActiveDiff::patch($orig, ActiveDiff::compare($orig, $result)), $result);
 		
 		$file1 = file('file1.txt', FILE_IGNORE_NEW_LINES);
 		$file2 = file('file2.txt', FILE_IGNORE_NEW_LINES);
-		var_dump(ActiveDiff::compare($file1, $file2));
+		print_r(ActiveDiff::compare($file1, $file2));
 		
 	}
 }
