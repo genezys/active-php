@@ -68,7 +68,7 @@ class ActiveResponse
 		header('HTTP/1.1 '.$status.' '.$msg);
 	}
 	
-	/*static*/ function contentType($contentType, $encoding = 'UTF-8')
+	/*static*/ function contentType($contentType, $encoding)
 	{
 		$encodingPart = strlen($encoding) > 0 ? ';charset='.$encoding : '';
 		header('Content-Type: '.$contentType.$encodingPart);

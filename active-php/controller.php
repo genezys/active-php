@@ -4,7 +4,7 @@ require_once dirname(__FILE__).'/response.php';
 
 class ActiveController
 {
-	static $encoding;
+	static $encoding = 'UTF-8';
 	static $views;
 	static $routes = array();
 	static $responseTypes = array(); 

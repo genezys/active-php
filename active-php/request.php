@@ -111,13 +111,13 @@ class ActiveRequest
 		$accept = array();
 		foreach( $matches[2] as $index => $priority ) 
 		{
-			$values = split(',', $matches[1][$index]);
+			$values = explode(',', $matches[1][$index]);
 			$accept[$priority] = array_merge(
 				ActiveUtils::arrayGet($accept, $priority, array()), 
 				$values);
 		}
 		krsort($accept, SORT_NUMERIC);
-		return $accept;		
+		return $accept;
 	}
 }
 
