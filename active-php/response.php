@@ -3,6 +3,10 @@ require_once dirname(__FILE__).'/utils.php';
 
 class ActiveResponse
 {
+	static $status = 200;
+	static $encoding = 'UTF-8';
+	static $contentType = 'text/html';
+	
 	/*static*/ function messageFromStatus($code)
 	{
 		switch( $code )
@@ -62,16 +66,31 @@ class ActiveResponse
 		}
 	}
 
-	/*static*/ function status($status)
+	/*static*/ function status($status = null)
 	{
+		if( $status == null ) 
+		{
+			return ActiveResponse::$status;
+		}
+		ActiveResponse::$status = $status;
 		$msg = ActiveResponse::messageFromStatus($status);
 		header('HTTP/1.1 '.$status.' '.$msg);
 	}
 	
-	/*static*/ function contentType($contentType, $encoding)
+	/*static*/ function contentType($contentType = null, $encoding = null)
 	{
+		if( $contentType == null && $encoding == null )
+		{
+			return ActiveResponse::$contentType;
+		}
+		ActiveResponse::$contentType = $contentType;
+		ActiveResponse::$encoding = $encoding;
 		$encodingPart = strlen($encoding) > 0 ? ';charset='.$encoding : '';
 		header('Content-Type: '.$contentType.$encodingPart);
+	}
+	/*static*/ function encoding()
+	{
+		return ActiveResponse::$encoding;
 	}
 
 	/*static*/ function location($uri)

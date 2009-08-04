@@ -103,18 +103,14 @@ class ActiveRequest
 	/*static*/ function _parseAccept($key)
 	{
 		$acceptString = ActiveUtils::arrayGet($_SERVER, $key, '');
-		preg_match_all(
-			'$([\-/+*A-Za-z0-9]+(?:,[\-/+*a-z0-9]+)*)(?:;q=([0-9.]+))?$', 
-			$acceptString, 
-			$matches);
 		
 		$accept = array();
-		foreach( $matches[2] as $index => $priority ) 
+		foreach( explode(',', $acceptString) as $acceptType ) 
 		{
-			$values = explode(',', $matches[1][$index]);
-			$accept[$priority] = array_merge(
-				ActiveUtils::arrayGet($accept, $priority, array()), 
-				$values);
+			preg_match('$([\-/+*A-Za-z0-9]+)(?:;q=([0-9.]+))?$', $acceptType, $matches);
+			$mime = ActiveString::defaults($matches[1], "*/*");
+			$priority = ActiveString::defaults($matches[2], "1.0");
+			$accept[$priority][] = $mime;
 		}
 		krsort($accept, SORT_NUMERIC);
 		return $accept;

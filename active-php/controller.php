@@ -5,10 +5,11 @@ require_once dirname(__FILE__).'/response.php';
 class ActiveController
 {
 	static $encoding = 'UTF-8';
-	static $views;
+	static $views = null;
 	static $routes = array();
 	static $responseTypes = array(); 
-	static $format;
+	static $format = null;
+	static $values = array();
 	
 	/*static*/ function route($method, $path, $handler)
 	{
@@ -41,7 +42,7 @@ class ActiveController
 		}
 
 		ActiveResponse::status(404);
-		echo ActiveResponse::messageFromStatus(404);
+		ActiveResponse::_simpleMessage(ActiveResponse::status());
 	}
 	
 	/*static*/ function authenticateBasic($realm, $handler)
@@ -66,7 +67,7 @@ class ActiveController
 	
 	/*static*/ function views($fileRelativeTo, $path)
 	{
-		ActiveController::$views = dirname($fileRelativeTo).'/'.$path.'/'.basename($fileRelativeTo, '.php').'.';
+		ActiveController::$views = dirname($fileRelativeTo).'/'.$path.'.';
 	}
 	
 	/*static*/ function respondWith($extension, $mime, $handler)
@@ -76,18 +77,24 @@ class ActiveController
 	
 	/*static*/ function respondWithView($extension, $mime)
 	{
+		if( ActiveController::$views == null ) 
+		{
+			ActiveController::_simpleMessage('respondWithView() requires to use views() before');
+			exit();
+		}
 		ActiveController::_addResponseType($extension, $mime, 
 			array('view' => ActiveController::$views.$extension.'.php')
 		);
 	}
 	
-	/*static*/ function respond($values)
+	/*static*/ function respond()
 	{
 		$pathInfo = ActiveRequest::pathInfo();
 		$types = ActiveRequest::types();
 		
 		$registeredTypes = array();
-		foreach( ActiveController::$responseTypes as $responseType ) 
+		$responseTypesCount = count(ActiveController::$responseTypes);
+		foreach( ActiveController::$responseTypes as $index => $responseType ) 
 		{
 			if( strlen(ActiveController::$format) > 0 )
 			{
@@ -104,14 +111,14 @@ class ActiveController
 				$priority = ActiveController::_typeHandled($types, $responseType['mime']);
 				if( $priority !== false ) 
 				{
-					$registeredTypes[$priority] = $responseType;
+					$registeredTypes[$priority.($responseTypesCount-$index)] = $responseType;
 				}
 			}
 		}
 		if( count($registeredTypes) == 0 ) 
 		{
 			ActiveResponse::status(501);
-			echo ActiveResponse::messageFromStatus(501);
+			ActiveResponse::_simpleMessage(ActiveResponse::status());
 			return;
 		}
 		
@@ -123,12 +130,22 @@ class ActiveController
 		ActiveResponse::contentType($preferedType['mime'], ActiveController::$encoding);
 		if( isset($preferedType['view']) ) 
 		{
+			$values = ActiveController::$values;
 			include $preferedType['view'];
 		}
 		else 
 		{
 			call_user_func($preferedType['handler'], $values);
 		}
+	}
+	
+	/*static*/ function value($name, $value = null)
+	{
+		if( $value == null ) 
+		{
+			return ActiveUtils::arrayGet(ActiveController::$values, $name);
+		}
+		ActiveController::$values[$name] = $value;
 	}
 	
 	/*private*/
@@ -149,7 +166,7 @@ class ActiveController
 			{
 				if( $mime == '*/*' || $mime == $mimeSearched ) 
 				{
-					return $priority.''.(count($mimes) - $index);
+					return $priority.(count($mimes) - $index);
 				}
 			}
 		}
@@ -176,6 +193,18 @@ class ActiveController
 			return $params;
 		}
 		return false;
+	}
+	
+	/*static*/ function _simpleMessage($content)
+	{
+		if( ActiveResponse::contentType() == 'text/html' ) 
+		{
+			echo '<p>',$content,'</p>',"\n";
+		}
+		else 
+		{
+			echo $content;
+		}
 	}
 }
 
