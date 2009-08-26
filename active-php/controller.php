@@ -41,8 +41,7 @@ class ActiveController
 			}
 		}
 
-		ActiveResponse::status(404);
-		ActiveResponse::_simpleMessage(ActiveResponse::status());
+		ActiveController::status(404);
 	}
 	
 	/*static*/ function authenticateBasic($realm, $handler)
@@ -117,8 +116,7 @@ class ActiveController
 		}
 		if( count($registeredTypes) == 0 ) 
 		{
-			ActiveResponse::status(501);
-			ActiveResponse::_simpleMessage(ActiveResponse::status());
+			ActiveController::status(501);
 			return;
 		}
 		
@@ -147,6 +145,12 @@ class ActiveController
 		}
 		ActiveController::$values[$name] = $value;
 	}
+	
+	/*static*/ function status($status)
+	{
+		ActiveResponse::status($status);
+		ActiveController::_simpleMessage(ActiveResponse::messageFromStatus($status));
+	}	
 	
 	/*private*/
 	
@@ -177,7 +181,7 @@ class ActiveController
 	{
 		$pathInfo = preg_replace('$([.\+*?()[/\\]])$', '\\\\\\1', $pathInfo);
 		$pathInfo = preg_replace('$\\\\\\((.+?)\\\\\\)$', '(\\1)?', $pathInfo);
-		$pathInfo = preg_replace('$:([a-z]+)$', '(?P<\\1>.+?)', $pathInfo);
+		$pathInfo = preg_replace('$:([a-z]+)$', '(?P<\\1>[^\\/]+?)', $pathInfo);
 		$pathInfo = '/^'.$pathInfo.'$/';
 		
 		if( preg_match($pathInfo, $currentPathInfo, $matches) )
