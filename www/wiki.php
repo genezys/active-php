@@ -4,9 +4,6 @@ require_once dirname(__FILE__) . '/../active-php/index.php';
 ///////////////////////////////////////////////////////////////////////////////
 ActiveController::route('get', 'pages(.:format)', function($params)
 {
-	var_dump(ActiveRequest::types());
-	
-	
 	ActiveController::views(__FILE__, '../views/pages');
 	ActiveController::respondWithView('html', 'text/html');
 	ActiveController::respondWithView('xml', 'application/atom+xml');

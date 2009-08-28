@@ -13,10 +13,10 @@ class ActiveRequest
 		);
 	}
 
-	/*static*/ function script()
+	/*static*/ function scriptPath()
 	{
 		$scriptName = ActiveUtils::arrayGet($_SERVER, 'SCRIPT_NAME', '');
-		$script = substr(ActiveRequest::uri(), 0, strlen($scriptName));
+		$script = substr(ActiveRequest::requestUri(), 0, strlen($scriptName));
 		
 		if( $script != $scriptName )
 		{
@@ -29,23 +29,33 @@ class ActiveRequest
 
 	/*static*/ function scriptDir()
 	{
-		return rtrim(dirname(ActiveRequest::script()), '/');
+		return rtrim(dirname(ActiveRequest::scriptPath()), '/');
+	}
+	
+	/*static*/ function scriptUri()
+	{
+		return ActiveRequest::scheme().'://'.ActiveRequest::domain().ActiveRequest::scriptPath();
 	}
 
-	/*static*/ function uri()
+	/*static*/ function requestUri()
 	{
 		return ActiveUtils::arrayGet($_SERVER, 'REQUEST_URI', '');
 	}
 	
-	/*static*/ function relative($uri)
+	/*sttaic*/ function scheme()
 	{
-		return ActiveRequest::scriptDir().'/'.$uri;
+		return isset($_SERVER['HTTPS']) ? 'https' : 'http';
 	}
-
+	
+	/*static*/ function domain()
+	{
+		return getenv('HTTP_HOST');
+	}
+	
 	/*static*/ function pathInfo()
 	{
-		$requestUri = ActiveRequest::uri();
-		$script = ActiveRequest::script();
+		$requestUri = ActiveRequest::requestUri();
+		$script = ActiveRequest::scriptPath();
 		$pathInfo = substr($requestUri, strlen($script));
 		
 		$pathInfo = ActiveString::escapeMagicQuotes($pathInfo);
@@ -57,7 +67,7 @@ class ActiveRequest
 	
 	/*static*/ function query()
 	{
-		$queryString = ActiveString::after(ActiveRequest::uri(), '?');
+		$queryString = ActiveString::after(ActiveRequest::requestUri(), '?');
 		$query = array();
 		parse_str($queryString, $query);
 		return $query;
