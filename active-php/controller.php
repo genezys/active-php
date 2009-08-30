@@ -64,9 +64,13 @@ class ActiveController
 		ActiveController::$encoding = $encoding;
 	}
 	
-	/*static*/ function views($fileRelativeTo, $path)
+	/*static*/ function views($arg1, $arg2 = null)
 	{
-		ActiveController::$views = dirname($fileRelativeTo).'/'.$path.'.';
+		if( $arg2 != null ) 
+		{
+			ActiveController::views(dirname($arg1).'/'.$arg2);
+		}
+		ActiveController::$views = $arg1.'.';
 	}
 	
 	/*static*/ function respondWith($extension, $mime, $handler)

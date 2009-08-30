@@ -29,12 +29,17 @@ class ActiveRequest
 
 	/*static*/ function scriptDir()
 	{
-		return rtrim(dirname(ActiveRequest::scriptPath()), '/');
+		return dirname(ActiveRequest::scriptPath());
 	}
 	
 	/*static*/ function scriptUri()
 	{
 		return ActiveRequest::scheme().'://'.ActiveRequest::domain().ActiveRequest::scriptPath();
+	}
+
+	/*static*/ function relativeUri($path)
+	{
+		return dirname(ActiveRequest::scriptUri()).'/'.$path;
 	}
 
 	/*static*/ function requestUri()
