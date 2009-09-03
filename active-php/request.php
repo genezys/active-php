@@ -123,8 +123,8 @@ class ActiveRequest
 		foreach( explode(',', $acceptString) as $acceptType ) 
 		{
 			preg_match('$([\-/+*A-Za-z0-9]+)(?:;q=([0-9.]+))?$', $acceptType, $matches);
-			$mime = ActiveString::defaults($matches[1], "*/*");
-			$priority = ActiveString::defaults($matches[2], "1.0");
+			$mime = ActiveUtils::arrayGet($matches, 1, "*/*");
+			$priority = ActiveUtils::arrayGet($matches, 2, "1.0");
 			$accept[$priority][] = $mime;
 		}
 		krsort($accept, SORT_NUMERIC);

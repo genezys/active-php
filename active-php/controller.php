@@ -64,13 +64,9 @@ class ActiveController
 		ActiveController::$encoding = $encoding;
 	}
 	
-	/*static*/ function views($arg1, $arg2 = null)
+	/*static*/ function views($fileRelativeTo, $path)
 	{
-		if( $arg2 != null ) 
-		{
-			ActiveController::views(dirname($arg1).'/'.$arg2);
-		}
-		ActiveController::$views = $arg1.'.';
+		ActiveController::$views = dirname($fileRelativeTo).'/'.$path.'.';
 	}
 	
 	/*static*/ function respondWith($extension, $mime, $handler)
@@ -137,7 +133,7 @@ class ActiveController
 		}
 		else 
 		{
-			call_user_func($preferedType['handler'], $values);
+			call_user_func($preferedType['handler'], ActiveController::$values);
 		}
 	}
 	

@@ -6,10 +6,15 @@ class ActiveUtils
 	{
 		return isset($array[$key]) ? $array[$key] : $default;
 	}
+
+	/*static*/ function realPath($path)
+	{
+		return str_replace(realpath($path), '\\', '/');
+	}
 	
 	/*static*/ function relativePath($file, $path)
 	{
-		return substr(realpath($path), strlen(dirname(realpath($file))) + 1);
+		return substr(ActiveUtils::realPath($path), strlen(dirname(ActiveUtils::realPath($file))) + 1);
 	}
 }
 
