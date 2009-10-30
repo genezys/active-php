@@ -64,9 +64,9 @@ class ActiveController
 		ActiveController::$encoding = $encoding;
 	}
 	
-	/*static*/ function views($fileRelativeTo, $path)
+	/*static*/ function views($path)
 	{
-		ActiveController::$views = dirname($fileRelativeTo).'/'.$path.'.';
+		ActiveController::$views = $path.'.';
 	}
 	
 	/*static*/ function respondWith($extension, $mime, $handler)
@@ -150,7 +150,12 @@ class ActiveController
 	{
 		ActiveResponse::status($status);
 		ActiveController::_simpleMessage(ActiveResponse::messageFromStatus($status));
-	}	
+	}
+	
+	/*static*/ function routeUri($path)
+	{
+		return ActiveRequest::scriptUri().'/'.$path;
+	}
 	
 	/*private*/
 	
