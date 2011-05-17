@@ -12,11 +12,9 @@ class ActiveUtils
 		return str_replace('\\', '/', realpath($path));
 	}
 	
-	/*static*/ function relativePath($file, $path)
+	/*static*/ function dirName($path)
 	{
-		$pathBase = dirname(ActiveUtils::realPath($file));
-		$fullPath = ActiveUtils::realPath($path);
-		return substr($fullPath, strlen($pathBase) + 1);
+		return dirname(ActiveUtils::realPath($file));
 	}
 }
 

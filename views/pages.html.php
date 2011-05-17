@@ -2,6 +2,6 @@
 
 <ul>
 <?php foreach( $values['pages'] as $page ): ?>
-	<li><?php echo $page ?></li>
+	<li><a href="<?php echo ActiveRequest::relativeUri('wiki/pages/'.$page) ?>"><?php echo $page ?></a></li>
 <?php endforeach ?>
 </ul>

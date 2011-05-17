@@ -64,9 +64,9 @@ class ActiveController
 		ActiveController::$encoding = $encoding;
 	}
 	
-	/*static*/ function views($path)
+	/*static*/ function views($file, $relativePath)
 	{
-		ActiveController::$views = $path.'.';
+		ActiveController::$views = dirname($file).'/'.$relativePath;
 	}
 	
 	/*static*/ function respondWith($extension, $mime, $handler)
@@ -82,7 +82,7 @@ class ActiveController
 			exit();
 		}
 		ActiveController::_addResponseType($extension, $mime, 
-			array('view' => ActiveController::$views.$extension.'.php')
+			array('view' => ActiveUtils::realPath(ActiveController::$views.'.'.$extension.'.php'))
 		);
 	}
 	
